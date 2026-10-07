@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>การจำแนกช่องทางการขนส่งสินค้าส่งออกสัตว์น้ำด้วยเทคนิคเหมืองข้อมูล</title>
+<meta name="description" content="ปริญญานิพนธ์ ณัฐพงศ์ ไชยพูน — เว็บไซต์โครงงานและสไลด์นำเสนอ การจำแนกช่องทางการขนส่งสินค้าส่งออกสัตว์น้ำด้วยเทคนิคเหมืองข้อมูล ข้อมูลจริง 1,572,358 รายการ ความถูกต้อง 99.28%">
+<meta name="author" content="ณัฐพงศ์ ไชยพูน">
+<meta name="theme-color" content="#123A6B">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="th_TH">
+<meta property="og:title" content="การจำแนกช่องทางการขนส่งสินค้าส่งออกสัตว์น้ำด้วยเทคนิคเหมืองข้อมูล">
+<meta property="og:description" content="ปริญญานิพนธ์ · ณัฐพงศ์ ไชยพูน · ระบบสารสนเทศทางธุรกิจ มทร.ล้านนา">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23123A6B'/%3E%3Cpath d='M7 20c4-7 10-9 18-9-2 6-8 10-14 10l-2 3z' fill='%230E9FBF'/%3E%3Ccircle cx='20' cy='13.5' r='1.3' fill='%23F7F9FB'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root{
+    --navy:#123A6B; --ink:#13263F; --soft:#44576E; --faint:#78899C;
+    --paper:#F7F9FB; --tint:#E6F0F6; --line:#D5DEE6; --sea:#0E7E99; --aqua:#0E9FBF;
+    --air:#0E9FBF; --land:#B96F22; --ship:#5B6BD6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html{overflow-x:hidden}
+  body{
+    min-height:100vh; background:var(--paper); color:var(--ink);
+    font-family:"IBM Plex Sans Thai",-apple-system,"Segoe UI",Tahoma,sans-serif;
+    -webkit-font-smoothing:antialiased; position:relative; overflow-x:hidden;
+    display:flex; flex-direction:column;
+  }
+
+  /* ---------- ลายตกแต่งพื้นหลัง ---------- */
+  .blob{ position:absolute; border-radius:50%; pointer-events:none; z-index:0 }
+  .b1{ width:460px; height:460px; background:var(--sea); opacity:.09; top:-180px; right:-110px }
+  .b2{ width:300px; height:300px; background:var(--navy); opacity:.07; top:40px; right:120px }
+  .b3{ width:380px; height:380px; background:var(--aqua); opacity:.07; bottom:-170px; left:-130px }
+  .dots{ position:absolute; top:40px; left:40px; z-index:0; opacity:.5 }
+  .modebar{ position:fixed; left:0; right:0; bottom:0; height:6px; display:flex; z-index:3 }
+  .modebar i{ display:block; height:100% }
+
+  .wrap{ position:relative; z-index:1; width:100%; max-width:1080px; margin:0 auto; padding:0 24px }
+
+  /* ---------- หัวเรื่อง ---------- */
+  header{ padding:74px 0 34px }
+  .eyebrow{
+    font-size:14px; font-weight:600; color:var(--sea); letter-spacing:.06em;
+    text-transform:uppercase; margin-bottom:14px;
+  }
+  h1{ font-size:40px; font-weight:700; line-height:1.28; max-width:860px; color:var(--navy) }
+  .sub{ margin-top:18px; font-size:18px; color:var(--soft); line-height:1.6; max-width:720px }
+  .rule{ width:72px; height:3px; background:var(--sea); border-radius:2px; margin:26px 0 0 }
+
+  /* ---------- สถิติ ---------- */
+  .stats{ display:flex; flex-wrap:wrap; gap:14px 40px; margin-top:30px }
+  .stat b{ display:block; font-size:25px; font-weight:700; color:var(--navy);
+           font-variant-numeric:tabular-nums }
+  .stat span{ font-size:13.5px; color:var(--faint) }
+
+  /* ---------- การ์ดทางเข้า ---------- */
+  .cards{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; padding:12px 0 8px }
+  .card{
+    display:flex; flex-direction:column; gap:12px; text-decoration:none; color:inherit;
+    background:#fff; border:1px solid var(--line); border-radius:16px; padding:30px 28px 26px;
+    transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    box-shadow:0 1px 2px rgba(18,58,107,.05);
+  }
+  .card:hover{ transform:translateY(-3px); border-color:#AFC8DA;
+               box-shadow:0 16px 38px rgba(18,58,107,.13) }
+  .card:focus-visible{ outline:3px solid var(--aqua); outline-offset:3px }
+  .ico{
+    width:52px; height:52px; border-radius:13px; display:grid; place-items:center;
+    background:var(--tint); margin-bottom:4px;
+  }
+  .ico svg{ width:27px; height:27px; stroke:var(--sea); fill:none; stroke-width:1.8;
+            stroke-linecap:round; stroke-linejoin:round }
+  .card h2{ font-size:23px; font-weight:700; color:var(--navy) }
+  .card p{ font-size:15.5px; color:var(--soft); line-height:1.6 }
+  .card ul{ list-style:none; font-size:14.5px; color:var(--faint); line-height:1.85; margin-top:2px }
+  .card li::before{ content:"·"; color:var(--sea); font-weight:700; margin-right:8px }
+  .go{ margin-top:auto; padding-top:16px; font-size:15.5px; font-weight:600; color:var(--sea) }
+  .go::after{ content:" →" }
+
+  /* ---------- ท้ายหน้า ---------- */
+  .extra{ display:flex; flex-wrap:wrap; gap:12px; padding:24px 0 10px; align-items:center }
+  .pill{
+    display:inline-block; text-decoration:none; font-size:14.5px; color:var(--soft);
+    border:1px solid var(--line); background:#fff; border-radius:999px; padding:9px 17px;
+  }
+  .pill:hover{ border-color:#AFC8DA; color:var(--navy) }
+  footer{ margin-top:auto; padding:34px 0 46px; border-top:1px solid var(--line); margin-top:34px }
+  footer p{ font-size:14.5px; color:var(--faint); line-height:1.8 }
+  footer strong{ color:var(--ink); font-weight:600 }
+
+  @media (max-width:820px){
+    header{ padding:52px 0 26px }
+    h1{ font-size:30px }
+    .sub{ font-size:16.5px }
+    .cards{ grid-template-columns:1fr; gap:16px }
+    .dots{ display:none }
+    .stats{ gap:12px 26px }
+    .stat b{ font-size:21px }
+  }
+</style>
+</head>
+<body>
+
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<svg class="dots" width="86" height="86" aria-hidden="true">
+  <g fill="#0E7E99">
+    <circle cx="5" cy="5" r="3.4"/><circle cx="30" cy="5" r="3.4"/><circle cx="55" cy="5" r="3.4"/>
+    <circle cx="5" cy="30" r="3.4"/><circle cx="30" cy="30" r="3.4"/><circle cx="55" cy="30" r="3.4"/>
+    <circle cx="5" cy="55" r="3.4"/><circle cx="30" cy="55" r="3.4"/><circle cx="55" cy="55" r="3.4"/>
+  </g>
+</svg>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">ปริญญานิพนธ์ · ระบบสารสนเทศทางธุรกิจ มทร.ล้านนา</p>
+    <h1>การจำแนกช่องทางการขนส่งสินค้าส่งออกสัตว์น้ำด้วยเทคนิคเหมืองข้อมูล</h1>
+    <div class="rule"></div>
+    <p class="sub">นำข้อมูลการส่งออกสัตว์น้ำของกรมประมง พ.ศ. 2563–2567 มาสร้างตัวแบบจำแนกว่าแต่ละรายการถูกส่งออกทางอากาศ ทางบก หรือทางเรือ แล้วสกัดออกมาเป็นกฎที่อ่านและตรวจสอบได้</p>
+
+    <div class="stats">
+      <div class="stat"><b>1,572,358</b><span>รายการที่ใช้วิเคราะห์</span></div>
+      <div class="stat"><b>99.28%</b><span>ความถูกต้องของตัวแบบ</span></div>
+      <div class="stat"><b>92</b><span>กฎที่สกัดจากต้นไม้</span></div>
+      <div class="stat"><b>197</b><span>ประเทศปลายทาง</span></div>
+    </div>
+  </header>
+
+  <main class="cards">
+    <a class="card" href="model.html">
+      <div class="ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3v4M12 7 7 11M12 7l5 4"/><rect x="3" y="11" width="8" height="5" rx="1.4"/><rect x="13" y="11" width="8" height="5" rx="1.4"/><path d="M7 16v3M17 16v3"/><circle cx="7" cy="20.5" r="1.3"/><circle cx="17" cy="20.5" r="1.3"/></svg>
+      </div>
+      <h2>เว็บไซต์โครงงาน</h2>
+      <p>แดชบอร์ดข้อมูลการส่งออก ผลการเปรียบเทียบตัวแบบ และหน้าทดลองทำนายที่กรอกข้อมูลเองได้</p>
+      <ul>
+        <li>แดชบอร์ด 5 แท็บ กรองและเจาะลึกข้อมูลได้</li>
+        <li>ทดลองทำนายช่องทางขนส่งแบบสด</li>
+        <li>เห็นเส้นทางการตัดสินใจของต้นไม้ทีละเงื่อนไข</li>
+      </ul>
+      <span class="go">เปิดเว็บไซต์</span>
+    </a>
+
+    <a class="card" href="slides.html">
+      <div class="ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.6"/><path d="M12 16v4M8.5 20h7"/><path d="M7.5 8.5h6M7.5 11.5h9"/></svg>
+      </div>
+      <h2>สไลด์นำเสนอ</h2>
+      <p>เปิดดูสไลด์ได้ทันทีบนเว็บ คลิกหรือเลื่อนล้อเมาส์เพื่อไปหน้าถัดไป กด F เพื่อขยายเต็มจอ</p>
+      <ul>
+        <li>11 หน้า เลื่อนด้วยเมาส์ ปุ่มลูกศร หรือปัดบนมือถือ</li>
+        <li>กด “ดูทุกหน้า” เพื่อข้ามไปหน้าที่ต้องการ</li>
+        <li>ดาวน์โหลดเป็นไฟล์ PowerPoint ได้</li>
+      </ul>
+      <span class="go">เปิดสไลด์</span>
+    </a>
+  </main>
+
+  <div class="extra">
+    <a class="pill" href="progress-deck.pptx" download>ดาวน์โหลดสไลด์ (.pptx)</a>
+    <a class="pill" href="model.html#dash/predict">ไปหน้าทดลองทำนายโดยตรง</a>
+  </div>
+
+  <footer>
+    <p>
+      <strong>ณัฐพงศ์ ไชยพูน</strong> รหัสนักศึกษา 66541207056-7 · หลักสูตรระบบสารสนเทศทางธุรกิจ กลุ่มวิชาวิเคราะห์ข้อมูล<br>
+      อาจารย์ที่ปรึกษา <strong>ผศ.ดร. ชัชฎาพร ปุกแก้ว</strong> · มหาวิทยาลัยเทคโนโลยีราชมงคลล้านนา<br>
+      วิเคราะห์ข้อมูลด้วย Python · pandas · scikit-learn · เว็บไซต์เขียนด้วย HTML, CSS และ JavaScript
+    </p>
+  </footer>
+</div>
+
+<div class="modebar" aria-hidden="true">
+  <i style="width:49.55%;background:var(--air)"></i>
+  <i style="width:26.12%;background:var(--land)"></i>
+  <i style="width:24.32%;background:var(--ship)"></i>
+</div>
+
+</body>
+</html>
